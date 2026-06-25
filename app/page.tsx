@@ -14,9 +14,9 @@ export default function Home() {
 
       {/* HERO */}
       <section style={{ textAlign: 'center', padding: '5rem 2rem 3rem' }}>
-        <span style={{ background: '#e878c522', color: '#e878c5', fontSize: '12px', padding: '4px 14px', borderRadius: '99px', marginBottom: '1rem', display: 'inline-block' }}>Para agentes independientes de Argentina</span>
-        <h1 style={{ fontSize: '40px', fontWeight: 500, lineHeight: 1.2, marginBottom: '1rem', maxWidth: '600px', margin: '1rem auto' }}>Tu portal inmobiliario.<br />Tu marca. Tus comisiones.</h1>
-        <p style={{ fontSize: '16px', color: '#b7b7b7', maxWidth: '480px', margin: '0 auto 2rem', lineHeight: 1.7 }}>Armá tu propio portal con propiedades de inmobiliarias que comparten comisión. El cliente solo ve tu contacto.</p>
+        <span style={{ background: '#e878c522', color: '#e878c5', fontSize: '12px', padding: '4px 14px', borderRadius: '99px', marginBottom: '1rem', display: 'inline-block' }}>Para agentes compradores de Argentina</span>
+        <h1 style={{ fontSize: '40px', fontWeight: 500, lineHeight: 1.2, marginBottom: '1rem', maxWidth: '600px', margin: '1rem auto' }}>Tu búsqueda.<br />Tu marca. Tus comisiones.</h1>
+        <p style={{ fontSize: '16px', color: '#b7b7b7', maxWidth: '480px', margin: '0 auto 2rem', lineHeight: 1.7 }}>Llevá el seguimiento de tus búsquedas, armá fichas con tus datos y enviáselas a tus clientes por WhatsApp.</p>
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
           <button style={{ background: '#e878c5', color: '#fff', border: 'none', borderRadius: '8px', padding: '12px 28px', fontSize: '15px', cursor: 'pointer' }}>Empezar gratis</button>
           <button style={{ background: 'transparent', color: '#e878c5', border: '1.5px solid #e878c5', borderRadius: '8px', padding: '12px 28px', fontSize: '15px', cursor: 'pointer' }}>Ver demo</button>
@@ -25,13 +25,13 @@ export default function Home() {
 
       {/* FEATURES */}
       <section id="como" style={{ padding: '3rem 2rem', background: '#0d0d0d' }}>
-        <h2 style={{ textAlign: 'center', fontSize: '24px', fontWeight: 500, marginBottom: '2rem' }}>Todo lo que necesitás para trabajar como agente comprador</h2>
+        <h2 style={{ textAlign: 'center', fontSize: '24px', fontWeight: 500, marginBottom: '2rem' }}>Todo lo que necesitás para gestionar tus búsquedas como agente comprador</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', maxWidth: '800px', margin: '0 auto' }}>
           {[
-            { icon: '🏠', title: 'Portal propio', desc: 'Tu nombre, logo y colores. Tu marca siempre adelante.' },
-            { icon: '🤝', title: 'Propiedades colaborativas', desc: 'Accedé a propiedades de inmobiliarias que comparten comisión.' },
-            { icon: '👥', title: 'Seguimiento de clientes', desc: 'Gestioná tus compradores y el estado de cada operación.' },
-            { icon: '📊', title: 'Métricas de tu negocio', desc: 'Visualizá tus operaciones y comisiones generadas.' },
+            { icon: '📋', title: 'CRM de búsquedas', desc: 'Cargá cada cliente con sus preferencias y llevá el estado de cada búsqueda hasta el cierre.' },
+            { icon: '🏠', title: 'Propiedades de la red', desc: 'Accedé a propiedades de inmobiliarias y otras redes que comparten comisión.' },
+            { icon: '📲', title: 'Fichas por WhatsApp', desc: 'Armá fichas con tus datos y enviáselas a tus clientes en un clic. El vendedor nunca aparece.' },
+            { icon: '📊', title: 'Seguimiento completo', desc: 'Desde la búsqueda hasta el cierre, todo en un solo lugar con tu marca.' },
           ].map((f, i) => (
             <div key={i} style={{ background: '#111', border: '0.5px solid #222', borderRadius: '12px', padding: '1.25rem' }}>
               <div style={{ fontSize: '28px', marginBottom: '10px' }}>{f.icon}</div>
@@ -48,8 +48,8 @@ export default function Home() {
         <p style={{ textAlign: 'center', color: '#b7b7b7', fontSize: '15px', marginBottom: '2rem' }}>Arrancá gratis y escalá cuando lo necesites.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', maxWidth: '800px', margin: '0 auto' }}>
           {[
-            { name: 'Free', price: '$0', desc: 'Para arrancar sin riesgos.', features: ['Portal básico', 'Hasta 10 propiedades', 'Hasta 5 clientes', 'Acceso a la red'], featured: false },
-            { name: 'Pro', price: '$12.900', desc: 'Para el agente en movimiento.', features: ['Propiedades ilimitadas', '50 clientes', 'CRM incluido', 'Soporte prioritario'], featured: true },
+            { name: 'Free', price: '$0', desc: 'Para arrancar sin riesgos.', features: ['CRM básico', 'Hasta 5 búsquedas activas', 'Hasta 5 clientes', 'Fichas por WhatsApp'], featured: false },
+            { name: 'Pro', price: '$12.900', desc: 'Para el agente en movimiento.', features: ['Búsquedas ilimitadas', '50 clientes activos', 'CRM completo', 'Soporte prioritario'], featured: true },
             { name: 'Premium', price: '$24.900', desc: 'Para quien trabaja a escala.', features: ['Todo ilimitado', 'Múltiples portales', 'API de integración', 'Gerente de cuenta'], featured: false },
           ].map((p, i) => (
             <div key={i} style={{ background: '#111', border: p.featured ? '2px solid #e878c5' : '0.5px solid #222', borderRadius: '12px', padding: '1.5rem', position: 'relative' }}>
@@ -75,7 +75,7 @@ export default function Home() {
       {/* FOOTER */}
       <footer style={{ padding: '1.5rem 2rem', borderTop: '0.5px solid #222', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: '16px', fontWeight: 500 }}>Red<span style={{ color: '#e878c5' }}>Prop</span></div>
-        <p style={{ fontSize: '13px', color: '#b7b7b7' }}>© 2025 RedProp · Buenos Aires, Argentina</p>
+        <p style={{ fontSize: '13px', color: '#b7b7b7' }}>© 2026 RedProp · Buenos Aires, Argentina</p>
       </footer>
 
     </main>
