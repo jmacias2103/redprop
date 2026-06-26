@@ -1,15 +1,23 @@
 'use client'
 import { useState } from 'react'
 
+const AGENTE = {
+  nombre: 'Martín López',
+  telefono: '5491144556677',
+  whatsapp: '5491144556677',
+}
+
 export default function Dashboard() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
   const [clientes, setClientes] = useState([
-    { cliente: 'Sofía Ramírez', busqueda: '3 amb · Palermo · hasta USD 200k', estado: 'Activa', fichas: 3 },
-    { cliente: 'Juan Gómez', busqueda: '2 amb · Caballito · hasta USD 110k', estado: 'En espera', fichas: 1 },
-    { cliente: 'Laura Peralta', busqueda: 'PH · Belgrano · hasta USD 350k', estado: 'Activa', fichas: 5 },
-    { cliente: 'Diego Morales', busqueda: 'Local · Flores · hasta USD 80k', estado: 'Sin novedad', fichas: 0 },
+    { cliente: 'Sofía Ramírez', busqueda: '3 amb · Palermo · hasta USD 200k', estado: 'Activa', fichas: 3, telefono: '5491155667788' },
+    { cliente: 'Juan Gómez', busqueda: '2 amb · Caballito · hasta USD 110k', estado: 'En espera', fichas: 1, telefono: '5491166778899' },
+    { cliente: 'Laura Peralta', busqueda: 'PH · Belgrano · hasta USD 350k', estado: 'Activa', fichas: 5, telefono: '5491177889900' },
+    { cliente: 'Diego Morales', busqueda: 'Local · Flores · hasta USD 80k', estado: 'Sin novedad', fichas: 0, telefono: '5491188990011' },
   ])
-  const [form, setForm] = useState({ cliente: '', tipo: '', zona: '', presupuesto: '', ambientes: '', notas: '' })
+  const [form, setForm] = useState({ cliente: '', telefono: '', tipo: '', zona: '', presupuesto: '', ambientes: '', notas: '' })
+  const [mostrarFicha, setMostrarFicha] = useState(false)
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null)
 
   function guardarBusqueda() {
     if (!form.cliente) return
@@ -17,10 +25,42 @@ export default function Dashboard() {
       cliente: form.cliente,
       busqueda: `${form.ambientes} amb · ${form.zona} · hasta USD ${form.presupuesto}`,
       estado: 'Activa',
-      fichas: 0
+      fichas: 0,
+      telefono: form.telefono,
     }])
-    setForm({ cliente: '', tipo: '', zona: '', presupuesto: '', ambientes: '', notas: '' })
+    setForm({ cliente: '', telefono: '', tipo: '', zona: '', presupuesto: '', ambientes: '', notas: '' })
     setMostrarFormulario(false)
+  }
+
+  function abrirFicha(cliente: any) {
+    setClienteSeleccionado(cliente)
+    setMostrarFicha(true)
+  }
+
+  function enviarWhatsApp() {
+    if (!clienteSeleccionado) return
+    const mensaje = `🏠 *RedProp — Ficha de búsqueda*
+
+Hola ${clienteSeleccionado.cliente}! Te comparto propiedades según tu búsqueda:
+
+📋 *Tu búsqueda:* ${clienteSeleccionado.busqueda}
+
+🏢 *Propiedad sugerida:*
+- Tipo: Departamento 3 ambientes
+- Zona: Palermo
+- Precio: USD 185.000
+- Superficie: 78 m²
+- Cochera incluida
+
+👤 *Tu agente:*
+- ${AGENTE.nombre}
+- 📞 +${AGENTE.telefono}
+
+Cualquier consulta estoy a disposición 🙌`
+
+    const url = `https://wa.me/${clienteSeleccionado.telefono}?text=${encodeURIComponent(mensaje)}`
+    window.open(url, '_blank')
+    setMostrarFicha(false)
   }
 
   return (
@@ -91,7 +131,7 @@ export default function Dashboard() {
               <span style={{ fontSize: '11px', fontWeight: 500, padding: '3px 10px', borderRadius: '99px', background: b.estado === 'Activa' ? '#eaf3de' : b.estado === 'En espera' ? '#faeeda' : '#222', color: b.estado === 'Activa' ? '#27500A' : b.estado === 'En espera' ? '#854F0B' : '#b7b7b7' }}>
                 {b.estado}
               </span>
-              <button style={{ background: '#2563eb', color: '#fff', border: 'none', borderRadius: '6px', padding: '5px 12px', fontSize: '12px', cursor: 'pointer' }}>
+              <button onClick={() => abrirFicha(b)} style={{ background: '#2563eb', color: '#fff', border: 'none', borderRadius: '6px', padding: '5px 12px', fontSize: '12px', cursor: 'pointer' }}>
                 📲 Enviar ficha
               </button>
             </div>
@@ -109,6 +149,7 @@ export default function Dashboard() {
             </div>
             {[
               { label: 'Nombre del cliente', key: 'cliente', placeholder: 'Ej: Sofía Ramírez' },
+              { label: 'Teléfono WhatsApp (con código de país)', key: 'telefono', placeholder: 'Ej: 5491155667788' },
               { label: 'Tipo de propiedad', key: 'tipo', placeholder: 'Ej: Departamento, PH, Casa' },
               { label: 'Zona preferida', key: 'zona', placeholder: 'Ej: Palermo, Caballito' },
               { label: 'Presupuesto máximo (USD)', key: 'presupuesto', placeholder: 'Ej: 200000' },
@@ -128,6 +169,42 @@ export default function Dashboard() {
             <div style={{ display: 'flex', gap: '10px', marginTop: '1.5rem' }}>
               <button onClick={() => setMostrarFormulario(false)} style={{ flex: 1, padding: '11px', background: 'transparent', border: '0.5px solid #333', borderRadius: '8px', color: '#b7b7b7', fontSize: '14px', cursor: 'pointer' }}>Cancelar</button>
               <button onClick={guardarBusqueda} style={{ flex: 1, padding: '11px', background: '#2563eb', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '14px', cursor: 'pointer', fontWeight: 500 }}>Guardar búsqueda</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL FICHA WHATSAPP */}
+      {mostrarFicha && clienteSeleccionado && (
+        <div style={{ position: 'fixed', inset: 0, background: '#000000aa', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: '#111', border: '0.5px solid #222', borderRadius: '16px', padding: '2rem', width: '480px', maxWidth: '90vw' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 500 }}>📲 Ficha para WhatsApp</h2>
+              <button onClick={() => setMostrarFicha(false)} style={{ background: 'transparent', border: 'none', color: '#b7b7b7', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ background: '#060606', border: '0.5px solid #333', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', fontSize: '13px', color: '#b7b7b7', lineHeight: 1.8 }}>
+              <p>🏠 <strong style={{ color: '#fff' }}>RedProp — Ficha de búsqueda</strong></p>
+              <br />
+              <p>Hola <strong style={{ color: '#fff' }}>{clienteSeleccionado.cliente}</strong>! Te comparto propiedades según tu búsqueda:</p>
+              <br />
+              <p>📋 <strong style={{ color: '#fff' }}>Tu búsqueda:</strong> {clienteSeleccionado.busqueda}</p>
+              <br />
+              <p>🏢 <strong style={{ color: '#fff' }}>Propiedad sugerida:</strong></p>
+              <p>• Tipo: Departamento 3 ambientes</p>
+              <p>• Zona: Palermo</p>
+              <p>• Precio: USD 185.000</p>
+              <p>• Superficie: 78 m²</p>
+              <p>• Cochera incluida</p>
+              <br />
+              <p>👤 <strong style={{ color: '#fff' }}>Tu agente:</strong></p>
+              <p>• {AGENTE.nombre}</p>
+              <p>• 📞 +{AGENTE.telefono}</p>
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setMostrarFicha(false)} style={{ flex: 1, padding: '11px', background: 'transparent', border: '0.5px solid #333', borderRadius: '8px', color: '#b7b7b7', fontSize: '14px', cursor: 'pointer' }}>Cancelar</button>
+              <button onClick={enviarWhatsApp} style={{ flex: 1, padding: '11px', background: '#25D366', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '14px', cursor: 'pointer', fontWeight: 500 }}>
+                Abrir WhatsApp 📲
+              </button>
             </div>
           </div>
         </div>
