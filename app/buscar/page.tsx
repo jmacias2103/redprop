@@ -30,7 +30,7 @@ export default function Buscar() {
     }
   }
 
-  function enviarWhatsApp() {
+ function enviarWhatsApp() {
     const telefono = prompt('Teléfono del cliente (con código de país, ej: 5491155667788):')
     if (!telefono) return
 
@@ -39,17 +39,17 @@ export default function Buscar() {
 - ${p.titulo}
 - 📍 ${p.direccion}
 - 💰 ${p.precio}
-- 📐 ${p.superficie}
-- 🌐 Portal: ${p.portal}
+${p.superficie ? `• 📐 ${p.superficie}` : ''}
+- 🌐 ${p.portal}
 `).join('\n---\n')
 
-    const mensaje = `🏠 *RedProp — Propiedades seleccionadas para vos*
+    const mensaje = `🏠 *Propiedades seleccionadas para vos*
 
-Hola! Te comparto estas propiedades según tu búsqueda:
+Hola! Te comparto estas opciones según tu búsqueda:
 
 ${fichas}
 
-👤 *Tu agente de búsqueda:*
+👤 *Tu agente:*
 - Jimile Macias
 - 📞 +54 9 11 6239-7307
 
@@ -58,7 +58,6 @@ Cualquier consulta estoy a disposición 🙌`
     const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`
     window.open(url, '_blank')
   }
-
   return (
     <main style={{ fontFamily: 'sans-serif', background: '#060606', minHeight: '100vh', color: '#ffffff', display: 'flex' }}>
 
