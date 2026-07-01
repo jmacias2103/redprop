@@ -66,8 +66,7 @@ function FichaContent() {
                   <button onClick={() => setFotoActual(f => f < fotos.length - 1 ? f + 1 : 0)}
                     style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: '#000000aa', border: 'none', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontSize: '16px' }}>›</button>
                   <div style={{ position: 'absolute', bottom: '8px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '4px' }}>
-                    {fotos.map((_, i) => (
-                      <div key={i} onClick={() => setFotoActual(i)} style={{ width: '6px', height: '6px', borderRadius: '50%', background: i === fotoActual ? '#fff' : '#ffffff66', cursor: 'pointer' }} />
+                    {fotos.map((_: string, i: number) => (                      <div key={i} onClick={() => setFotoActual(i)} style={{ width: '6px', height: '6px', borderRadius: '50%', background: i === fotoActual ? '#fff' : '#ffffff66', cursor: 'pointer' }} />
                     ))}
                   </div>
                 </>
