@@ -34,26 +34,26 @@ export default function Buscar() {
     const telefono = prompt('Teléfono del cliente (con código de país, ej: 5491155667788):')
     if (!telefono) return
 
-    const fichas = seleccionadas.map((p, i) => `
-🏠 *Propiedad ${i + 1}*
-- ${p.titulo}
-- 📍 ${p.direccion}
-- 💰 ${p.precio}
-${p.superficie ? `• 📐 ${p.superficie}` : ''}
-- 🌐 ${p.portal}
-`).join('\n---\n')
+    const agente = 'Jimile Macias'
+    const telefonoAgente = '5491162397307'
 
-    const mensaje = `🏠 *Propiedades seleccionadas para vos*
+    const mensajes = seleccionadas.map((p, i) => {
+      const params = new URLSearchParams({
+        titulo: p.titulo,
+        precio: p.precio,
+        direccion: p.direccion,
+        foto: p.foto,
+        superficie: p.superficie || '',
+        portal: p.portal,
+        link: p.link,
+        agente: agente,
+        telefono: telefonoAgente,
+      })
+      const fichaUrl = `https://redprop-two.vercel.app/ficha?${params.toString()}`
+      return `🏠 *Propiedad ${i + 1}:*\n${fichaUrl}`
+    }).join('\n\n')
 
-Hola! Te comparto estas opciones según tu búsqueda:
-
-${fichas}
-
-👤 *Tu agente:*
-- Jimile Macias
-- 📞 +54 9 11 6239-7307
-
-Cualquier consulta estoy a disposición 🙌`
+    const mensaje = `Hola! Te comparto estas propiedades según tu búsqueda 🏠\n\n${mensajes}\n\n👤 *Tu agente:* ${agente}\n📞 +${telefonoAgente}\n\nCualquier consulta estoy a disposición 🙌`
 
     const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`
     window.open(url, '_blank')
