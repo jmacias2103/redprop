@@ -30,38 +30,30 @@ export default function Buscar() {
     }
   }
 
- function enviarWhatsApp() {
+ async function enviarWhatsApp() {
     const telefono = prompt('Teléfono del cliente (con código de país, ej: 5491155667788):')
     if (!telefono) return
 
     const agente = 'Jimile Macias'
     const telefonoAgente = '5491162397307'
 
-    const mensajes = seleccionadas.map((p, i) => {
-      const params = new URLSearchParams({
-        titulo: p.titulo,
-        precio: p.precio,
-        direccion: p.direccion,
-        fotos: p.fotos?.join(',') || p.foto || '',
-        superficie: p.superficie || '',
-        ambientes: p.ambientes || '',
-        tipo: p.tipo || '',
-        portal: p.portal,
-        cochera: String(p.cochera || false),
-        balcon: String(p.balcon || false),
-        pileta: String(p.pileta || false),
-        amenities: String(p.amenities || false),
-        aptoCredito: String(p.aptoCredito || false),
-        antiguedad: p.antiguedad || '',
-        tags: p.tags?.join(',') || '',
-        agente,
-        telefono: telefonoAgente,
+    // Generar links cortos para cada propiedad
+    const links = await Promise.all(seleccionadas.map(async (p) => {
+      const res = await fetch('/api/ficha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...p, agente, telefono: telefonoAgente })
       })
-      const fichaUrl = `https://redprop-two.vercel.app/ficha?${params.toString()}`
-      return `🏠 *Propiedad ${i + 1}:*\n${fichaUrl}`
+      const data = await res.json()
+      return `https://redprop-two.vercel.app/f/${data.id}`
+    }))
+
+    const mensajes = seleccionadas.map((p, i) => {
+      const precioLimpio = p.precio.split('$')[0].trim()
+      return `🏠 *${precioLimpio} · ${p.direccion?.split(',')[0]}*\n${links[i]}`
     }).join('\n\n')
 
-    const mensaje = `Hola! Te comparto estas propiedades según tu búsqueda 🏠\n\n${mensajes}\n\n👤 *Tu agente:* ${agente}\n📞 +${telefonoAgente}\n\nCualquier consulta estoy a disposición 🙌`
+    const mensaje = `Hola! Te comparto estas propiedades 🏠\n\n${mensajes}\n\n👤 *${agente}*\n📞 +${telefonoAgente}\n\nCualquier consulta estoy a disposición 🙌`
 
     const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`
     window.open(url, '_blank')
