@@ -10,55 +10,117 @@ export async function GET(request: NextRequest) {
 
   const resultados: any[] = []
 
-  try {
-    // Zonaprop
-    const zonaSlug = zona.toLowerCase().replace(/ /g, '-').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    const urlZonaprop = `https://www.zonaprop.com.ar/${tipo}s-venta-${zonaSlug}-${ambientes}-ambientes.html`
-    const scraperUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(urlZonaprop)}&render=false`
+  const zonaSlug = zona.toLowerCase()
+    .replace(/ /g, '-')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
 
-    const res = await fetch(scraperUrl, { next: { revalidate: 0 } })
-    const html = await res.text()
-    const $ = cheerio.load(html)
+  const paginas = [1, 2, 3]
 
-    $('[data-id]').each((i, el) => {
-      if (i >= 8) return false
+  for (const pagina of paginas) {
+    try {
+      const offset = (pagina - 1) * 20
+      const urlZonaprop = ambientes
+        ? `https://www.zonaprop.com.ar/${tipo}s-venta-${zonaSlug}-${ambientes}-ambientes-mas-de-${offset}.html`
+        : `https://www.zonaprop.com.ar/${tipo}s-venta-${zonaSlug}-mas-de-${offset}.html`
 
-      const precio = $(el).find('[data-price]').attr('data-price') ||
-                     $(el).find('.firstPrice').text().trim()
-      const titulo = $(el).find('.postingCardTitle').text().trim() ||
-                     $(el).find('h2').first().text().trim()
-      const direccion = $(el).find('.postingCardLocation span').first().text().trim()
-      const foto = $(el).find('img').first().attr('data-src') ||
-                   $(el).find('img').first().attr('src') || ''
-      const link = $(el).find('a.go-to-posting').attr('href') ||
-                   $(el).find('a').first().attr('href') || ''
-      const sup = $(el).find('.postingCardMainFeatures').text().trim()
+      const scraperUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(urlZonaprop)}&render=true`
 
-      if (titulo || precio) {
-        resultados.push({
-          portal: 'Zonaprop',
-          titulo: titulo || `${tipo} en ${zona}`,
-          precio: precio ? `USD ${Number(precio).toLocaleString()}` : 'Consultar',
-          direccion: direccion || zona,
-          foto: foto.startsWith('http') ? foto : '',
-          link: link.startsWith('http') ? link : `https://www.zonaprop.com.ar${link}`,
-          superficie: sup,
+      const res = await fetch(scraperUrl, { next: { revalidate: 0 } })
+      const html = await res.text()
+      const $ = cheerio.load(html)
+
+      $('[data-id]').each((i, el) => {
+        const dataId = $(el).attr('data-id')
+        if (!dataId) return
+
+        // Precio
+        const precioRaw = $(el).find('[data-price]').attr('data-price') || ''
+        const precioTexto = $(el).find('.firstPrice').text().trim() ||
+                            $(el).find('[class*="price"]').first().text().trim() || ''
+        const precio = precioRaw
+          ? `USD ${Number(precioRaw).toLocaleString('es-AR')}`
+          : precioTexto || 'Consultar'
+
+        // Título real
+        const titulo = $(el).find('.postingCardTitle').text().trim() ||
+                       $(el).find('[class*="title"]').first().text().trim() ||
+                       $(el).find('h2').first().text().trim() ||
+                       `${tipo} en ${zona}`
+
+        // Dirección
+        const direccion = $(el).find('.postingCardLocation span').first().text().trim() ||
+                          $(el).find('[class*="location"]').first().text().trim() || zona
+
+        // Fotos — solo fotos de propiedades, no logos
+        const fotos: string[] = []
+        $(el).find('img').each((j, img) => {
+          const src = $(img).attr('data-src') || $(img).attr('src') || ''
+          if (src.includes('/avisos/') && !src.includes('/empresas/')) {
+            const srcGrande = src.replace('360x266', '720x532').replace('-I.jpg', '-O.jpg')
+            if (!fotos.includes(srcGrande)) fotos.push(srcGrande)
+          }
         })
-      }
-    })
 
-  } catch (error) {
-    console.log('Error scraping:', error)
+        // Link
+        const link = $(el).find('a.go-to-posting').attr('href') ||
+                     $(el).find('a[href*="/propiedades/"]').first().attr('href') || ''
+
+        // Superficie y ambientes
+        const featuresText = $(el).find('.postingCardMainFeatures').text().trim()
+        const supMatch = featuresText.match(/(\d+)\s*m²/)
+        const superficie = supMatch ? `${supMatch[1]} m²` : ''
+        const ambMatch = featuresText.match(/(\d+)\s*amb/i)
+        const ambientesCard = ambMatch ? `${ambMatch[1]} ambientes` : ''
+
+        // Tags de características
+        const tags: string[] = []
+        $(el).find('[class*="feature"] span, [class*="tag"] span, [class*="pill"]').each((j, tag) => {
+          const text = $(tag).text().trim()
+          if (text && text.length > 1) tags.push(text)
+        })
+
+        const textoCompleto = $(el).text().toLowerCase()
+        const aptoCredito = textoCompleto.includes('apto crédito') || textoCompleto.includes('apto credito')
+        const cochera = textoCompleto.includes('cochera') || textoCompleto.includes('garage')
+        const balcon = textoCompleto.includes('balcón') || textoCompleto.includes('balcon')
+        const pileta = textoCompleto.includes('pileta') || textoCompleto.includes('piscina')
+        const amenities = textoCompleto.includes('amenities') || textoCompleto.includes('ameniti')
+        const antiguedadMatch = textoCompleto.match(/(\d+)\s*año/)
+        const antiguedad = antiguedadMatch ? `${antiguedadMatch[1]} años` : ''
+
+        if (titulo || precio) {
+          resultados.push({
+            portal: 'Zonaprop',
+            titulo,
+            precio,
+            direccion,
+            fotos,
+            foto: fotos[0] || '',
+            link: link.startsWith('http') ? link : `https://www.zonaprop.com.ar${link}`,
+            superficie,
+            ambientes: ambientesCard,
+            tipo,
+            aptoCredito,
+            cochera,
+            balcon,
+            pileta,
+            amenities,
+            antiguedad,
+            tags,
+          })
+        }
+      })
+
+    } catch (error) {
+      console.log(`Error página ${pagina}:`, error)
+    }
   }
 
-  // Si no trajo nada del scraping
-  if (resultados.length === 0) {
-    return NextResponse.json({
-      resultados: [],
-      total: 0,
-      mensaje: 'No se encontraron propiedades. Probá con otra zona o tipo.'
-    })
-  }
+  // Eliminar duplicados por link
+  const unicos = resultados.filter((item, index, self) =>
+    index === self.findIndex(t => t.link === item.link)
+  )
 
-  return NextResponse.json({ resultados, total: resultados.length })
+  return NextResponse.json({ resultados: unicos, total: unicos.length })
 }
